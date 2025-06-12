@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import '../../models/product.dart';
 
 abstract class ProductEvent extends Equatable {
   const ProductEvent();
@@ -48,4 +49,13 @@ class DeleteProduct extends ProductEvent {
 
   @override
   List<Object?> get props => [id];
+}
+
+class CreateProduct extends ProductEvent {
+  final Product product;
+
+  const CreateProduct(this.product);
+
+  @override
+  List<Object?> get props => [product];
 } 

@@ -61,6 +61,17 @@ class ProductDeleted extends ProductState {
   List<Object?> get props => [productId];
 }
 
+class ProductCreating extends ProductState {}
+
+class ProductCreated extends ProductState {
+  final Product product;
+
+  const ProductCreated(this.product);
+
+  @override
+  List<Object?> get props => [product];
+}
+
 class ProductError extends ProductState {
   final String message;
 

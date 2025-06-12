@@ -9,6 +9,7 @@ import '../repositories/product_repository.dart';
 import '../widgets/product_card.dart';
 import '../widgets/filter_dialog.dart';
 import 'product_details_page.dart';
+import 'add_product_page.dart';
 
 class ProductListPage extends StatelessWidget {
   const ProductListPage({super.key});
@@ -182,11 +183,9 @@ class _ProductListViewState extends State<ProductListView> {
   }
 
   void _navigateToAddProduct(BuildContext context) {
-    // TODO: Navigate to add product page
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Add Product page'),
-        duration: Duration(seconds: 1),
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const AddProductPage(),
       ),
     );
   }
