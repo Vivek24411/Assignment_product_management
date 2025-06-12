@@ -16,6 +16,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     on<ClearFilters>(_onClearFilters);
     on<DeleteProduct>(_onDeleteProduct);
     on<CreateProduct>(_onCreateProduct);
+    on<UpdateProduct>(_onUpdateProduct);
   }
 
   Future<void> _onLoadProducts(
@@ -120,6 +121,19 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     try {
       final createdProduct = await _productRepository.createProduct(event.product);
       emit(ProductCreated(createdProduct));
+    } catch (e) {
+      emit(ProductError(e.toString()));
+    }
+  }
+
+  Future<void> _onUpdateProduct(
+    UpdateProduct event,
+    Emitter<ProductState> emit,
+  ) async {
+    emit(ProductUpdating());
+    try {
+      final updatedProduct = await _productRepository.updateProduct(event.product);
+      emit(ProductUpdated(updatedProduct));
     } catch (e) {
       emit(ProductError(e.toString()));
     }

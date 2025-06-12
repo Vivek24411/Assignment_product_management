@@ -72,6 +72,17 @@ class ProductCreated extends ProductState {
   List<Object?> get props => [product];
 }
 
+class ProductUpdating extends ProductState {}
+
+class ProductUpdated extends ProductState {
+  final Product product;
+
+  const ProductUpdated(this.product);
+
+  @override
+  List<Object?> get props => [product];
+}
+
 class ProductError extends ProductState {
   final String message;
 

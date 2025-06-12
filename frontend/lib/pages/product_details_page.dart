@@ -5,6 +5,7 @@ import '../blocs/product/product_event.dart';
 import '../blocs/product/product_state.dart';
 import '../models/product.dart';
 import '../repositories/product_repository.dart';
+import 'edit_product_page.dart';
 
 class ProductDetailsPage extends StatelessWidget {
   final String productId;
@@ -319,11 +320,9 @@ class ProductDetailsView extends StatelessWidget {
   }
 
   void _navigateToEditProduct(BuildContext context, Product product) {
-    // TODO: Navigate to edit product page
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Edit product: ${product.name}'),
-        duration: const Duration(seconds: 1),
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => EditProductPage(productId: product.id),
       ),
     );
   }
