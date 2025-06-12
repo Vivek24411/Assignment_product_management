@@ -48,9 +48,31 @@ class _ProductListViewState extends State<ProductListView> {
         title: const Text('Product Manager'),
         backgroundColor: Theme.of(context).colorScheme.primaryContainer,
         actions: [
+          BlocBuilder<ProductBloc, ProductState>(
+            builder: (context, state) {
+              if (state is ProductLoaded && 
+                  (state.selectedCategory != null || state.inStockFilter != null)) {
+                return IconButton(
+                  icon: const Icon(Icons.clear_all),
+                  onPressed: () {
+                    context.read<ProductBloc>().add(const ClearFilters());
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Filters cleared'),
+                        duration: Duration(seconds: 1),
+                      ),
+                    );
+                  },
+                  tooltip: 'Clear Filters',
+                );
+              }
+              return const SizedBox.shrink();
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.filter_list),
             onPressed: () => _showFilterDialog(context),
+            tooltip: 'Filter Products',
           ),
         ],
       ),
@@ -114,43 +136,84 @@ class _ProductListViewState extends State<ProductListView> {
               onRefresh: () {
                 context.read<ProductBloc>().add(const RefreshProducts());
               },
-              child: state.products.isEmpty
-                  ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
+              child: Column(
+                children: [
+                  if (state.selectedCategory != null || state.inStockFilter != null)
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(12),
+                      margin: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.secondaryContainer,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
                         children: [
                           Icon(
-                            Icons.inventory_2_outlined,
-                            size: 64,
-                            color: Colors.grey[400],
+                            Icons.filter_list,
+                            color: Theme.of(context).colorScheme.onSecondaryContainer,
+                            size: 20,
                           ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'No products found',
-                            style: Theme.of(context).textTheme.headlineSmall,
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              _getFilterText(state),
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.onSecondaryContainer,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
                           ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Add your first product to get started',
-                            style: Theme.of(context).textTheme.bodyMedium,
+                          TextButton(
+                            onPressed: () {
+                              context.read<ProductBloc>().add(const ClearFilters());
+                            },
+                            child: const Text('Clear'),
                           ),
                         ],
                       ),
-                    )
-                  : ListView.builder(
-                      padding: const EdgeInsets.all(16),
-                      itemCount: state.products.length,
-                      itemBuilder: (context, index) {
-                        final product = state.products[index];
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 8),
-                          child: ProductCard(
-                            product: product,
-                            onTap: () => _navigateToProductDetails(context, product),
-                          ),
-                        );
-                      },
                     ),
+                  Expanded(
+                    child: state.products.isEmpty
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.inventory_2_outlined,
+                                  size: 64,
+                                  color: Colors.grey[400],
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  'No products found',
+                                  style: Theme.of(context).textTheme.headlineSmall,
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Add your first product to get started',
+                                  style: Theme.of(context).textTheme.bodyMedium,
+                                ),
+                              ],
+                            ),
+                          )
+                        : ListView.builder(
+                            padding: const EdgeInsets.all(16),
+                            itemCount: state.products.length,
+                            itemBuilder: (context, index) {
+                              final product = state.products[index];
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 8),
+                                child: ProductCard(
+                                  product: product,
+                                  onTap: () => _navigateToProductDetails(context, product),
+                                ),
+                              );
+                            },
+                          ),
+                  ),
+                ],
+              ),
             );
           }
 
@@ -165,6 +228,20 @@ class _ProductListViewState extends State<ProductListView> {
         label: const Text('Add Product'),
       ),
     );
+  }
+
+  String _getFilterText(ProductLoaded state) {
+    final filters = <String>[];
+    
+    if (state.selectedCategory != null) {
+      filters.add('Category: ${state.selectedCategory}');
+    }
+    
+    if (state.inStockFilter != null) {
+      filters.add(state.inStockFilter! ? 'In Stock' : 'Out of Stock');
+    }
+    
+    return 'Active filters: ${filters.join(', ')}';
   }
 
   void _showFilterDialog(BuildContext context) {

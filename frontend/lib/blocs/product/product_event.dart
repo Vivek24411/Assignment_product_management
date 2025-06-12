@@ -28,14 +28,16 @@ class RefreshProducts extends ProductEvent {
 class FilterProducts extends ProductEvent {
   final String? category;
   final bool? inStock;
+  final String? stockFilter;
 
   const FilterProducts({
     this.category,
     this.inStock,
+    this.stockFilter,
   });
 
   @override
-  List<Object?> get props => [category, inStock];
+  List<Object?> get props => [category, inStock, stockFilter];
 }
 
 class ClearFilters extends ProductEvent {

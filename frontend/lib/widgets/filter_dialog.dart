@@ -12,7 +12,7 @@ class FilterDialog extends StatefulWidget {
 
 class _FilterDialogState extends State<FilterDialog> {
   String? selectedCategory;
-  bool? inStockFilter;
+  String? stockFilter;
 
   final List<String> categories = [
     'Electronics',
@@ -28,7 +28,13 @@ class _FilterDialogState extends State<FilterDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Filter Products'),
+      title: Row(
+        children: [
+          const Icon(Icons.filter_list),
+          const SizedBox(width: 8),
+          const Text('Filter Products'),
+        ],
+      ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -36,6 +42,7 @@ class _FilterDialogState extends State<FilterDialog> {
             decoration: const InputDecoration(
               labelText: 'Category',
               border: OutlineInputBorder(),
+              prefixIcon: Icon(Icons.category),
             ),
             value: selectedCategory,
             hint: const Text('All Categories'),
@@ -56,32 +63,49 @@ class _FilterDialogState extends State<FilterDialog> {
             },
           ),
           const SizedBox(height: 16),
-          DropdownButtonFormField<bool>(
+          DropdownButtonFormField<String>(
             decoration: const InputDecoration(
               labelText: 'Stock Status',
               border: OutlineInputBorder(),
+              prefixIcon: Icon(Icons.inventory_2),
             ),
-            value: inStockFilter,
+            value: stockFilter,
             hint: const Text('All Products'),
             items: const [
-              DropdownMenuItem<bool>(
+              DropdownMenuItem<String>(
                 value: null,
                 child: Text('All Products'),
               ),
-              DropdownMenuItem<bool>(
-                value: true,
+              DropdownMenuItem<String>(
+                value: 'in_stock',
                 child: Text('In Stock'),
               ),
-              DropdownMenuItem<bool>(
-                value: false,
+              DropdownMenuItem<String>(
+                value: 'low_stock',
+                child: Text('Low Stock'),
+              ),
+              DropdownMenuItem<String>(
+                value: 'out_of_stock',
                 child: Text('Out of Stock'),
               ),
             ],
             onChanged: (value) {
               setState(() {
-                inStockFilter = value;
+                stockFilter = value;
               });
             },
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: _resetFilters,
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Reset'),
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -92,19 +116,29 @@ class _FilterDialogState extends State<FilterDialog> {
           },
           child: const Text('Cancel'),
         ),
-        FilledButton(
-          onPressed: () {
-            context.read<ProductBloc>().add(
-              FilterProducts(
-                category: selectedCategory,
-                inStock: inStockFilter,
-              ),
-            );
-            Navigator.of(context).pop();
-          },
-          child: const Text('Apply'),
+        FilledButton.icon(
+          onPressed: _applyFilters,
+          icon: const Icon(Icons.check),
+          label: const Text('Apply'),
         ),
       ],
     );
+  }
+
+  void _resetFilters() {
+    setState(() {
+      selectedCategory = null;
+      stockFilter = null;
+    });
+  }
+
+  void _applyFilters() {
+    context.read<ProductBloc>().add(
+      FilterProducts(
+        category: selectedCategory,
+        stockFilter: stockFilter,
+      ),
+    );
+    Navigator.of(context).pop();
   }
 } 

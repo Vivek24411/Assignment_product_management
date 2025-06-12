@@ -8,13 +8,17 @@ class ProductRepository {
   Future<List<Product>> getProducts({
     String? category,
     bool? inStock,
+    String? stockFilter,
   }) async {
     try {
       final queryParams = <String, String>{};
       if (category != null && category.isNotEmpty) {
         queryParams['category'] = category;
       }
-      if (inStock != null) {
+      
+      if (stockFilter != null) {
+        queryParams['stock_filter'] = stockFilter;
+      } else if (inStock != null) {
         queryParams['in_stock'] = inStock.toString();
       }
 

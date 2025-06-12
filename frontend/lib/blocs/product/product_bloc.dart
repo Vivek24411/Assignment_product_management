@@ -76,6 +76,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
       final products = await _productRepository.getProducts(
         category: event.category,
         inStock: event.inStock,
+        stockFilter: event.stockFilter,
       );
       emit(ProductLoaded(
         products: products,
