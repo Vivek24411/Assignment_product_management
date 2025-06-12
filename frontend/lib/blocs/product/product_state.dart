@@ -39,6 +39,28 @@ class ProductLoaded extends ProductState {
   }
 }
 
+class SingleProductLoading extends ProductState {}
+
+class SingleProductLoaded extends ProductState {
+  final Product product;
+
+  const SingleProductLoaded(this.product);
+
+  @override
+  List<Object?> get props => [product];
+}
+
+class ProductDeleting extends ProductState {}
+
+class ProductDeleted extends ProductState {
+  final String productId;
+
+  const ProductDeleted(this.productId);
+
+  @override
+  List<Object?> get props => [productId];
+}
+
 class ProductError extends ProductState {
   final String message;
 

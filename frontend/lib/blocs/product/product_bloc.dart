@@ -10,9 +10,11 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
       : _productRepository = productRepository,
         super(ProductInitial()) {
     on<LoadProducts>(_onLoadProducts);
+    on<LoadProduct>(_onLoadProduct);
     on<RefreshProducts>(_onRefreshProducts);
     on<FilterProducts>(_onFilterProducts);
     on<ClearFilters>(_onClearFilters);
+    on<DeleteProduct>(_onDeleteProduct);
   }
 
   Future<void> _onLoadProducts(
@@ -23,6 +25,19 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     try {
       final products = await _productRepository.getProducts();
       emit(ProductLoaded(products: products));
+    } catch (e) {
+      emit(ProductError(e.toString()));
+    }
+  }
+
+  Future<void> _onLoadProduct(
+    LoadProduct event,
+    Emitter<ProductState> emit,
+  ) async {
+    emit(SingleProductLoading());
+    try {
+      final product = await _productRepository.getProduct(event.id);
+      emit(SingleProductLoaded(product));
     } catch (e) {
       emit(ProductError(e.toString()));
     }
@@ -78,6 +93,19 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     try {
       final products = await _productRepository.getProducts();
       emit(ProductLoaded(products: products));
+    } catch (e) {
+      emit(ProductError(e.toString()));
+    }
+  }
+
+  Future<void> _onDeleteProduct(
+    DeleteProduct event,
+    Emitter<ProductState> emit,
+  ) async {
+    emit(ProductDeleting());
+    try {
+      await _productRepository.deleteProduct(event.id);
+      emit(ProductDeleted(event.id));
     } catch (e) {
       emit(ProductError(e.toString()));
     }

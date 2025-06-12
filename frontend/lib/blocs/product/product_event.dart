@@ -11,6 +11,15 @@ class LoadProducts extends ProductEvent {
   const LoadProducts();
 }
 
+class LoadProduct extends ProductEvent {
+  final String id;
+
+  const LoadProduct(this.id);
+
+  @override
+  List<Object?> get props => [id];
+}
+
 class RefreshProducts extends ProductEvent {
   const RefreshProducts();
 }
@@ -30,4 +39,13 @@ class FilterProducts extends ProductEvent {
 
 class ClearFilters extends ProductEvent {
   const ClearFilters();
+}
+
+class DeleteProduct extends ProductEvent {
+  final String id;
+
+  const DeleteProduct(this.id);
+
+  @override
+  List<Object?> get props => [id];
 } 

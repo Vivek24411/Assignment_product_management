@@ -8,6 +8,7 @@ import '../models/product.dart';
 import '../repositories/product_repository.dart';
 import '../widgets/product_card.dart';
 import '../widgets/filter_dialog.dart';
+import 'product_details_page.dart';
 
 class ProductListPage extends StatelessWidget {
   const ProductListPage({super.key});
@@ -173,11 +174,9 @@ class _ProductListViewState extends State<ProductListView> {
   }
 
   void _navigateToProductDetails(BuildContext context, Product product) {
-    // TODO: Navigate to product details page
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Product details for ${product.name}'),
-        duration: const Duration(seconds: 1),
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => ProductDetailsPage(productId: product.id),
       ),
     );
   }
