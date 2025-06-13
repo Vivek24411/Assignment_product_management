@@ -3,7 +3,11 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 
+	"product-management-backend/config"
+	"product-management-backend/handlers"
+	"product-management-backend/repository"
 	"product-management-backend/routes"
 
 	"github.com/gin-contrib/cors"
@@ -11,6 +15,19 @@ import (
 )
 
 func main() {
+	dbPath := os.Getenv("DB_PATH")
+	if dbPath == "" {
+		dbPath = "products.db"
+	}
+
+	db, err := config.NewDatabase(dbPath)
+	if err != nil {
+		log.Fatal("Failed to connect to database:", err)
+	}
+
+	productRepo := repository.NewProductRepository(db)
+	productHandler := handlers.NewProductHandler(productRepo)
+
 	r := gin.Default()
 
 	config := cors.DefaultConfig()
@@ -27,7 +44,7 @@ func main() {
 		})
 	})
 
-	routes.SetupRoutes(r)
+	routes.SetupRoutes(r, productHandler)
 
 	log.Println("Server starting on port 8080...")
 	if err := r.Run(":8080"); err != nil {

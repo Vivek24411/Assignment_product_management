@@ -1,68 +1,95 @@
 package handlers
 
 import (
+	"context"
 	"net/http"
+	"time"
 
 	"product-management-backend/models"
+	"product-management-backend/repository"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type ProductHandler struct {
-	products []models.Product
+	repo *repository.ProductRepository
 }
 
-func NewProductHandler() *ProductHandler {
+func NewProductHandler(repo *repository.ProductRepository) *ProductHandler {
 	return &ProductHandler{
-		products: make([]models.Product, 0),
+		repo: repo,
 	}
 }
 
 func (h *ProductHandler) GetProducts(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
+	defer cancel()
+
 	var filter models.ProductFilter
 	if err := c.ShouldBindQuery(&filter); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	filteredProducts := h.filterProducts(filter)
-	c.JSON(http.StatusOK, filteredProducts)
+	products, err := h.repo.GetAll(ctx, filter)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch products"})
+		return
+	}
+
+	c.JSON(http.StatusOK, products)
 }
 
 func (h *ProductHandler) GetProduct(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
+	defer cancel()
+
 	id := c.Param("id")
 
-	for _, product := range h.products {
-		if product.ID == id {
-			c.JSON(http.StatusOK, product)
-			return
-		}
+	product, err := h.repo.GetByID(ctx, id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch product"})
+		return
 	}
 
-	c.JSON(http.StatusNotFound, gin.H{"error": "Product not found"})
+	if product == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Product not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, product)
 }
 
 func (h *ProductHandler) CreateProduct(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
+	defer cancel()
+
 	var req models.CreateProductRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	product := models.Product{
-		ID:       uuid.New().String(),
+	product := &models.Product{
 		Name:     req.Name,
 		Category: req.Category,
 		Quantity: req.Quantity,
 		Price:    req.Price,
 	}
 
-	h.products = append(h.products, product)
+	if err := h.repo.Create(ctx, product); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create product"})
+		return
+	}
+
 	c.JSON(http.StatusCreated, product)
 }
 
 func (h *ProductHandler) UpdateProduct(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
+	defer cancel()
+
 	id := c.Param("id")
 
 	var req models.UpdateProductRequest
@@ -71,71 +98,45 @@ func (h *ProductHandler) UpdateProduct(c *gin.Context) {
 		return
 	}
 
-	for i, product := range h.products {
-		if product.ID == id {
-			h.products[i].Name = req.Name
-			h.products[i].Category = req.Category
-			h.products[i].Quantity = req.Quantity
-			h.products[i].Price = req.Price
-
-			c.JSON(http.StatusOK, h.products[i])
-			return
-		}
+	product := &models.Product{
+		Name:     req.Name,
+		Category: req.Category,
+		Quantity: req.Quantity,
+		Price:    req.Price,
 	}
 
-	c.JSON(http.StatusNotFound, gin.H{"error": "Product not found"})
+	if err := h.repo.Update(ctx, id, product); err != nil {
+		if err == gorm.ErrRecordNotFound {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Product not found"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update product"})
+		return
+	}
+
+	updatedProduct, err := h.repo.GetByID(ctx, id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch updated product"})
+		return
+	}
+
+	c.JSON(http.StatusOK, updatedProduct)
 }
 
 func (h *ProductHandler) DeleteProduct(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
+	defer cancel()
+
 	id := c.Param("id")
 
-	for i, product := range h.products {
-		if product.ID == id {
-			h.products = append(h.products[:i], h.products[i+1:]...)
-			c.Status(http.StatusNoContent)
+	if err := h.repo.Delete(ctx, id); err != nil {
+		if err == gorm.ErrRecordNotFound {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Product not found"})
 			return
 		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete product"})
+		return
 	}
 
-	c.JSON(http.StatusNotFound, gin.H{"error": "Product not found"})
-}
-
-func (h *ProductHandler) filterProducts(filter models.ProductFilter) []models.Product {
-	var filtered []models.Product
-
-	for _, product := range h.products {
-		if filter.Category != "" && product.Category != filter.Category {
-			continue
-		}
-
-		if filter.InStock != nil {
-			if *filter.InStock && product.Quantity <= 0 {
-				continue
-			}
-			if !*filter.InStock && product.Quantity > 0 {
-				continue
-			}
-		}
-
-		if filter.StockFilter != "" {
-			switch filter.StockFilter {
-			case "in_stock":
-				if product.Quantity <= 5 {
-					continue
-				}
-			case "low_stock":
-				if product.Quantity > 5 || product.Quantity <= 0 {
-					continue
-				}
-			case "out_of_stock":
-				if product.Quantity > 0 {
-					continue
-				}
-			}
-		}
-
-		filtered = append(filtered, product)
-	}
-
-	return filtered
+	c.Status(http.StatusNoContent)
 }

@@ -2,16 +2,19 @@ package models
 
 import (
 	"time"
+
+	"gorm.io/gorm"
 )
 
 type Product struct {
-	ID        string    `json:"id" bson:"_id,omitempty"`
-	Name      string    `json:"name" bson:"name" binding:"required"`
-	Category  string    `json:"category" bson:"category" binding:"required"`
-	Quantity  int       `json:"quantity" bson:"quantity" binding:"required,min=0"`
-	Price     float64   `json:"price" bson:"price" binding:"required,min=0"`
-	CreatedAt time.Time `json:"created_at" bson:"created_at"`
-	UpdatedAt time.Time `json:"updated_at" bson:"updated_at"`
+	ID        uint           `json:"id" gorm:"primaryKey"`
+	Name      string         `json:"name" gorm:"not null;size:255" binding:"required"`
+	Category  string         `json:"category" gorm:"not null;size:100" binding:"required"`
+	Quantity  int            `json:"quantity" gorm:"not null;default:0" binding:"required,min=0"`
+	Price     float64        `json:"price" gorm:"not null;type:decimal(10,2)" binding:"required,min=0"`
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
+	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
 }
 
 type CreateProductRequest struct {
