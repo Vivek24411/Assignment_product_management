@@ -13,7 +13,7 @@ class LoadProducts extends ProductEvent {
 }
 
 class LoadProduct extends ProductEvent {
-  final String id;
+  final int id;
 
   const LoadProduct(this.id);
 
@@ -45,7 +45,7 @@ class ClearFilters extends ProductEvent {
 }
 
 class DeleteProduct extends ProductEvent {
-  final String id;
+  final int id;
 
   const DeleteProduct(this.id);
 

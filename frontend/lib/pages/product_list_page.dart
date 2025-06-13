@@ -245,9 +245,12 @@ class _ProductListViewState extends State<ProductListView> {
   }
 
   void _showFilterDialog(BuildContext context) {
+    final productBloc = context.read<ProductBloc>();
     showDialog(
       context: context,
-      builder: (context) => const FilterDialog(),
+      builder: (context) => FilterDialog(
+        productBloc: productBloc,
+      ),
     );
   }
 
@@ -256,7 +259,10 @@ class _ProductListViewState extends State<ProductListView> {
       MaterialPageRoute(
         builder: (context) => ProductDetailsPage(productId: product.id),
       ),
-    );
+    ).then((_) {
+      // Refresh the product list when returning from product details page
+      context.read<ProductBloc>().add(const LoadProducts());
+    });
   }
 
   void _navigateToAddProduct(BuildContext context) {
@@ -264,6 +270,9 @@ class _ProductListViewState extends State<ProductListView> {
       MaterialPageRoute(
         builder: (context) => const AddProductPage(),
       ),
-    );
+    ).then((_) {
+      // Refresh the product list when returning from add product page
+      context.read<ProductBloc>().add(const LoadProducts());
+    });
   }
 } 

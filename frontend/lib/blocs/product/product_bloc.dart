@@ -109,6 +109,8 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     try {
       await _productRepository.deleteProduct(event.id);
       emit(ProductDeleted(event.id));
+      final products = await _productRepository.getProducts();
+      emit(ProductLoaded(products: products));
     } catch (e) {
       emit(ProductError(e.toString()));
     }
@@ -122,6 +124,8 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     try {
       final createdProduct = await _productRepository.createProduct(event.product);
       emit(ProductCreated(createdProduct));
+      final products = await _productRepository.getProducts();
+      emit(ProductLoaded(products: products));
     } catch (e) {
       emit(ProductError(e.toString()));
     }
@@ -135,6 +139,8 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     try {
       final updatedProduct = await _productRepository.updateProduct(event.product);
       emit(ProductUpdated(updatedProduct));
+      final products = await _productRepository.getProducts();
+      emit(ProductLoaded(products: products));
     } catch (e) {
       emit(ProductError(e.toString()));
     }

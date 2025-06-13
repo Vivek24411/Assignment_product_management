@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import '../blocs/product/product_bloc.dart';
 import '../blocs/product/product_event.dart';
 
 class FilterDialog extends StatefulWidget {
-  const FilterDialog({super.key});
+  final ProductBloc productBloc;
+  
+  const FilterDialog({
+    super.key,
+    required this.productBloc,
+  });
 
   @override
   State<FilterDialog> createState() => _FilterDialogState();
@@ -133,7 +137,7 @@ class _FilterDialogState extends State<FilterDialog> {
   }
 
   void _applyFilters() {
-    context.read<ProductBloc>().add(
+    widget.productBloc.add(
       FilterProducts(
         category: selectedCategory,
         stockFilter: stockFilter,

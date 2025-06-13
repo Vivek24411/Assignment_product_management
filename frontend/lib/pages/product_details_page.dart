@@ -8,7 +8,7 @@ import '../repositories/product_repository.dart';
 import 'edit_product_page.dart';
 
 class ProductDetailsPage extends StatelessWidget {
-  final String productId;
+  final int productId;
 
   const ProductDetailsPage({
     super.key,
@@ -27,7 +27,7 @@ class ProductDetailsPage extends StatelessWidget {
 }
 
 class ProductDetailsView extends StatelessWidget {
-  final String productId;
+  final int productId;
 
   const ProductDetailsView({
     super.key,
@@ -226,6 +226,7 @@ class ProductDetailsView extends StatelessWidget {
             context,
             'Product Information',
             [
+              _buildDetailRow('ID', product.id.toString()),
               _buildDetailRow('Name', product.name),
               _buildDetailRow('Category', product.category),
               _buildDetailRow('Price', '\$${product.price.toStringAsFixed(2)}'),
@@ -328,6 +329,7 @@ class ProductDetailsView extends StatelessWidget {
   }
 
   void _showDeleteConfirmation(BuildContext context, Product product) {
+    final productBloc = context.read<ProductBloc>();
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -343,7 +345,7 @@ class ProductDetailsView extends StatelessWidget {
           FilledButton(
             onPressed: () {
               Navigator.of(context).pop();
-              context.read<ProductBloc>().add(DeleteProduct(product.id));
+              productBloc.add(DeleteProduct(product.id));
             },
             style: FilledButton.styleFrom(
               backgroundColor: Colors.red,

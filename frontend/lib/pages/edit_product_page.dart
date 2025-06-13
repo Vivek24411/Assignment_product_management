@@ -8,7 +8,7 @@ import '../models/product.dart';
 import '../repositories/product_repository.dart';
 
 class EditProductPage extends StatelessWidget {
-  final String productId;
+  final int productId;
 
   const EditProductPage({
     super.key,
@@ -27,7 +27,7 @@ class EditProductPage extends StatelessWidget {
 }
 
 class EditProductView extends StatefulWidget {
-  final String productId;
+  final int productId;
 
   const EditProductView({
     super.key,

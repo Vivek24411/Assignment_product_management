@@ -16,7 +16,7 @@ class ProductRepository {
         queryParams['category'] = category;
       }
       
-      if (stockFilter != null) {
+      if (stockFilter != null && stockFilter.isNotEmpty) {
         queryParams['stock_filter'] = stockFilter;
       } else if (inStock != null) {
         queryParams['in_stock'] = inStock.toString();
@@ -29,22 +29,24 @@ class ProductRepository {
         final List<dynamic> jsonList = json.decode(response.body);
         return jsonList.map((json) => Product.fromJson(json)).toList();
       } else {
-        throw Exception('Failed to load products');
+        throw Exception('Failed to load products: ${response.statusCode}');
       }
     } catch (e) {
       throw Exception('Network error: $e');
     }
   }
 
-  Future<Product> getProduct(String id) async {
+  Future<Product> getProduct(int id) async {
     try {
       final response = await http.get(Uri.parse('$baseUrl/products/$id'));
 
       if (response.statusCode == 200) {
         final json = jsonDecode(response.body);
         return Product.fromJson(json);
+      } else if (response.statusCode == 404) {
+        throw Exception('Product not found');
       } else {
-        throw Exception('Failed to load product');
+        throw Exception('Failed to load product: ${response.statusCode}');
       }
     } catch (e) {
       throw Exception('Network error: $e');
@@ -56,14 +58,20 @@ class ProductRepository {
       final response = await http.post(
         Uri.parse('$baseUrl/products'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(product.toJson()),
+        body: jsonEncode({
+          'name': product.name,
+          'category': product.category,
+          'quantity': product.quantity,
+          'price': product.price,
+        }),
       );
 
       if (response.statusCode == 201) {
         final json = jsonDecode(response.body);
         return Product.fromJson(json);
       } else {
-        throw Exception('Failed to create product');
+        final errorBody = jsonDecode(response.body);
+        throw Exception(errorBody['error'] ?? 'Failed to create product');
       }
     } catch (e) {
       throw Exception('Network error: $e');
@@ -75,26 +83,39 @@ class ProductRepository {
       final response = await http.put(
         Uri.parse('$baseUrl/products/${product.id}'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(product.toJson()),
+        body: jsonEncode({
+          'name': product.name,
+          'category': product.category,
+          'quantity': product.quantity,
+          'price': product.price,
+        }),
       );
 
       if (response.statusCode == 200) {
         final json = jsonDecode(response.body);
         return Product.fromJson(json);
+      } else if (response.statusCode == 404) {
+        throw Exception('Product not found');
       } else {
-        throw Exception('Failed to update product');
+        final errorBody = jsonDecode(response.body);
+        throw Exception(errorBody['error'] ?? 'Failed to update product');
       }
     } catch (e) {
       throw Exception('Network error: $e');
     }
   }
 
-  Future<void> deleteProduct(String id) async {
+  Future<void> deleteProduct(int id) async {
     try {
       final response = await http.delete(Uri.parse('$baseUrl/products/$id'));
 
       if (response.statusCode != 204) {
-        throw Exception('Failed to delete product');
+        if (response.statusCode == 404) {
+          throw Exception('Product not found');
+        } else {
+          final errorBody = jsonDecode(response.body);
+          throw Exception(errorBody['error'] ?? 'Failed to delete product');
+        }
       }
     } catch (e) {
       throw Exception('Network error: $e');

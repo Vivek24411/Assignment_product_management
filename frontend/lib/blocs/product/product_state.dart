@@ -53,7 +53,7 @@ class SingleProductLoaded extends ProductState {
 class ProductDeleting extends ProductState {}
 
 class ProductDeleted extends ProductState {
-  final String productId;
+  final int productId;
 
   const ProductDeleted(this.productId);
 

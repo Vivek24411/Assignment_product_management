@@ -285,7 +285,7 @@ class _AddProductViewState extends State<AddProductView> {
       final price = double.parse(_priceController.text);
 
       final product = Product(
-        id: '', // Will be set by the backend
+        id: 0, // Will be set by the backend
         name: name,
         category: category,
         quantity: quantity,
