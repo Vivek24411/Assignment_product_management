@@ -1,16 +1,20 @@
-# frontend
+# Product Management System
 
-A new Flutter project.
+A full-stack product management application built with **Flutter** (frontend) and **Go with SQLite** (backend). This application provides a complete CRUD interface for managing products with features like filtering, search, and real-time updates.
 
-## Getting Started
+##  Features
 
-This project is a starting point for a Flutter application.
+### Frontend (Flutter)
+- **Product Management**: Add, edit, delete, and view products
+- **Real-time Updates**: Automatic refresh after CRUD operations
+- **Advanced Filtering**: Filter by category and stock status
+- **Loading States**: Visual feedback during operations
+- **State Management**: BLoC pattern for robust state management
 
-A few resources to get you started if this is your first Flutter project:
+### Backend (Go + SQLite)
+- **RESTful API**: Complete CRUD endpoints
+- **SQLite Database**: Lightweight, file-based database
+- **GORM ORM**: Object-Relational Mapping for database operations
+- **CORS Support**: Cross-origin resource sharing enabled
+- **Input Validation**: Request validation and error handling
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
